@@ -12,6 +12,7 @@
 								 [hiccup "1.0.5"]
 								 [ring "1.3.2"]
 								 [ring-server "0.4.0"]
+								 [ring/ring-json "0.4.0"]
                  [ring/ring-defaults "0.1.5"]]
 
   :plugins [[lein-cljsbuild "1.1.0"]
