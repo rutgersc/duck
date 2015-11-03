@@ -13,7 +13,8 @@
 								 [ring "1.3.2"]
 								 [ring-server "0.4.0"]
 								 [ring/ring-json "0.4.0"]
-                 [ring/ring-defaults "0.1.5"]]
+                 [ring/ring-defaults "0.1.5"]
+								 [cljs-ajax "0.5.1"]]
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-figwheel "0.4.0"]]

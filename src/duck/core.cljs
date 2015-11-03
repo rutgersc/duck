@@ -1,6 +1,7 @@
 (ns ^:figwheel-always duck.core
   (:require [reagent.core :as reagent :refer [atom]]
 						[goog.net.XhrIo :as xhr]
+						[ajax.core :refer [GET POST]]
 ))
 
 (enable-console-print!)
@@ -12,20 +13,21 @@
 (reagent/render-component [hello-world] (. js/document (getElementById "app")))
 
 
-
-(defn get-json-javadoc [project-git-url success]
-	(xhr/send "/javadoc" success "POST" (str "url=" project-git-url)))
-;goog.net.XhrIo.send(url, opt_callback, opt_method, opt_content, opt_headers, opt_timeoutInterval)
-;https://closure-library.googlecode.com/git-history/docs/class_goog_net_XhrIo.html
-
+(defn get-json-javadoc [git-url success]
+	(POST "/javadoc"
+        {:body (str "url=" git-url)
+				 :response-format :json
+				 :keywords? true
+         :handler success
+         :error-handler (fn [err]
+										(.log js/console err))}))
 
 (defn on-js-reload []
 
 	(get-json-javadoc
 	 	"https://github.com/weavejester/ring-json-response"
-	 	(fn [reply]
-			;(.log js/console reply)
-			(.log js/console (.getResponse (.-target reply)))))
+  	(fn [data]
+			(println (:foo data))))
 
 	(swap! app-state assoc :text "yolo")
 )
