@@ -1,0 +1,2 @@
+lein figwheel
+pause
