@@ -17,14 +17,21 @@
                  [cljs-ajax "0.5.1"]
                  [secretary "1.2.3"]]
 
-  :aot :all
-
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-figwheel "0.4.0"]]
 
   :source-paths ["src/clj" "src/cljs"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+
+
+  ;; CUSTOM DOCLET COMPILE
+  :aot [duck.doclet]
+  ;; To compile the doclet we need to add tools.jar from the java jdk!!!!!!!!!!!!!!
+  :resource-paths ["src/javadoc-jdk1.8.0_60-libs/tools.jar"]
+  ;;:uberjar-name "duck-doclet.jar"
+  :uberjar {:aot :all}
+
 
   :cljsbuild {
               :builds [{:id "dev"
@@ -51,7 +58,7 @@
              ;; :nrepl-port 7888 ;; Start an nREPL server into the running figwheel process
 
              ;; Server Ring Handler (optional) if you want to embed a ring handler into the figwheel http-kit
-             ;; server, this is for simple ring servers, if this doesn't work for you just run your own server :)
+             ;; server, this is for simple ring servers, if this doesn't work for you just run your own server :
              :ring-handler duck.server/handler})
 
              ;; if you want to disable the REPL
