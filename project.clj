@@ -8,36 +8,37 @@
                  [org.clojure/clojurescript "1.7.122"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [reagent "0.5.0"]
-								 [compojure "1.3.4"]
-								 [hiccup "1.0.5"]
-								 [ring "1.3.2"]
-								 [ring-server "0.4.0"]
-								 [ring/ring-json "0.4.0"]
+                 [compojure "1.3.4"]
+                 [hiccup "1.0.5"]
+                 [ring "1.3.2"]
+                 [ring-server "0.4.0"]
+                 [ring/ring-json "0.4.0"]
                  [ring/ring-defaults "0.1.5"]
-								 [cljs-ajax "0.5.1"]]
+                 [cljs-ajax "0.5.1"]
+                 [secretary "1.2.3"]]
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-figwheel "0.4.0"]]
 
-  :source-paths ["src"]
+  :source-paths ["src/clj" "src/cljs"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
-    :builds [{:id "dev"
-              :source-paths ["src"]
-              :figwheel {:on-jsload "duck.core/on-js-reload" }
-              :compiler {:main duck.core
-                         :asset-path "js/compiled/out"
-                         :output-to "resources/public/js/compiled/duck.js"
-                         :output-dir "resources/public/js/compiled/out"
-                         :source-map-timestamp true }}
-             {:id "min"
-              :source-paths ["src"]
-              :compiler {:output-to "resources/public/js/compiled/duck.js"
-                         :main duck.core
-                         :optimizations :advanced
-                         :pretty-print false}}]}
+              :builds [{:id "dev"
+                        :source-paths ["src/cljs"]
+                        :figwheel {:on-jsload "duck.core/on-js-reload"}
+                        :compiler {:main duck.core
+                                   :asset-path "js/compiled/out"
+                                   :output-to "resources/public/js/compiled/duck.js"
+                                   :output-dir "resources/public/js/compiled/out"
+                                   :source-map-timestamp true}}
+                       {:id "min"
+                        :source-paths ["src/cljs"]
+                        :compiler {:output-to "resources/public/js/compiled/duck.js"
+                                   :main duck.core
+                                   :optimizations :advanced
+                                   :pretty-print false}}]}
 
   :figwheel {
              ;; :http-server-root "public" ;; default and assumes "resources"
@@ -49,11 +50,10 @@
 
              ;; Server Ring Handler (optional) if you want to embed a ring handler into the figwheel http-kit
              ;; server, this is for simple ring servers, if this doesn't work for you just run your own server :)
-             :ring-handler duck.server/handler
+             :ring-handler duck.server/handler})
 
              ;; if you want to disable the REPL
              ;; :repl false
 
              ;; to configure a different figwheel logfile path
              ;; :server-logfile "tmp/logs/figwheel-logfile.log"
-             })
