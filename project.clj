@@ -17,6 +17,8 @@
                  [cljs-ajax "0.5.1"]
                  [secretary "1.2.3"]]
 
+  :aot :all
+
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-figwheel "0.4.0"]]
 
