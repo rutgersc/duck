@@ -38,7 +38,7 @@
   ;; CUSTOM DOCLET COMPILE
   :aot [duck.doclet]
   ;; To compile the doclet we need to add tools.jar from the java jdk!!!!!!!!!!!!!!
-  :resource-paths [#=(tools-jar)]
+  ;;:resource-paths [#=(tools-jar)]
   ;:extra-classpath-dirs [#=(tools-jar)]
   ;;:uberjar-name "duck-doclet.jar"
   :uberjar {:aot :all}
