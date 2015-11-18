@@ -3,7 +3,7 @@
 (defn tools-jar []
   ;; for some reason the JRE often ends up on JAVA_HOME. bit of a hack
   (.replace (.getCanonicalPath (io/file (System/getProperty "java.home")
-                               "lib" "tools.jar"))
+                                "lib" "tools.jar"))
            "jre"
            "jdk"))
 
@@ -25,7 +25,8 @@
                  [ring/ring-defaults "0.1.5"]
                  [cljs-ajax "0.5.1"]
                  [secretary "1.2.3"]
-                 [net.lingala.zip4j/zip4j "1.3.2"]]
+                 [net.lingala.zip4j/zip4j "1.3.2"]
+                 [quil "2.2.6"]]
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-figwheel "0.4.0"]]
