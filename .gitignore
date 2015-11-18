@@ -11,3 +11,7 @@ pom.xml
 .lein-plugins/
 .repl
 .nrepl-port
+
+# We just want this folder to exist, nothing inside
+downloads/*.zip
+downloads/*/*

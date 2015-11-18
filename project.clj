@@ -1,3 +1,12 @@
+(require '[clojure.java.io :as io])
+
+(defn tools-jar []
+  ;; for some reason the JRE often ends up on JAVA_HOME. bit of a hack
+  (.replace (.getCanonicalPath (io/file (System/getProperty "java.home")
+                               "lib" "tools.jar"))
+           "jre"
+           "jdk"))
+
 (defproject duck "0.1.0-SNAPSHOT"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
@@ -29,7 +38,8 @@
   ;; CUSTOM DOCLET COMPILE
   :aot [duck.doclet]
   ;; To compile the doclet we need to add tools.jar from the java jdk!!!!!!!!!!!!!!
-  :resource-paths ["src/javadoc-jdk1.8.0_60-libs/tools.jar"]
+  :resource-paths [#=(tools-jar)]
+  ;:extra-classpath-dirs [#=(tools-jar)]
   ;;:uberjar-name "duck-doclet.jar"
   :uberjar {:aot :all}
 
