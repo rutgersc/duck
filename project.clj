@@ -15,7 +15,8 @@
                  [ring/ring-json "0.4.0"]
                  [ring/ring-defaults "0.1.5"]
                  [cljs-ajax "0.5.1"]
-                 [secretary "1.2.3"]]
+                 [secretary "1.2.3"]
+                 [net.lingala.zip4j/zip4j "1.3.2"]]
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-figwheel "0.4.0"]]
