@@ -5,17 +5,21 @@
       :main false
       :methods [^:static [start [com.sun.javadoc.RootDoc] boolean]]))
 
-(defn print-package-name [package]
-  (println " " (.name package)))
-
-(defn all-classes [packages]
-  (mapcat (fn [p] (.ordinaryClasses p)) packages))
-
 (defn -start [root]
-  (let [packages (-> root .specifiedPackages)]
-    (println "All packages:")
-    (doall (map print-package-name packages))
+  (let [packages (.specifiedPackages root)
+        all-classes (mapcat #(.allClasses %) packages)
+        classes     (mapcat #(.ordinaryClasses %) packages)
+        interfaces  (mapcat #(.interfaces %) packages)]
+
+    (println "All packages:" (count packages))
+    (doseq [p packages] (println "  "(.name p)))
+
     (println "All classes:")
-    (let [classes (all-classes packages)]
-      (doall (map (fn [c] (println " " (.name c))) classes))))
+    (doseq [c all-classes] (println "  " (.name c)))
+
+    (println "Classes only:")
+    (doseq [c classes] (println "  " (.name c)))
+
+    (println "Interfaces only:")
+    (doseq [c interfaces] (println "  " (.name c))))
   true)
