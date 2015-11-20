@@ -64,7 +64,6 @@
 
 (defn main-page []
   [:div
-    [:canvas {:id "javadoc-canvas"}]
     [:div {:id "overlay"}
       [:h1 (:header-title @app-state)]
       [:div {:class "git-input-box"}
@@ -92,4 +91,5 @@
     (println "First load")
     (.addEventListener js/window "resize" windowresize-handler)))
 
-(defn on-js-reload [])
+(defn on-js-reload []
+  (println ".."))
