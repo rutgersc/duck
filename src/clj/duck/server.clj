@@ -10,14 +10,10 @@
         [ring.middleware.json :refer [wrap-json-response]]
         [ring.util.response :refer [response]]))
 
-
 (defn route-javadoc [url]
   (if-let [path (github/download-github-repo url)]
     (response {:foo (str "echo: " url "  |  unzipped folder name: " path)})
-
-    ; download-github-url does not return nil yet, just throw an exception.
-    (response {:foo (str "echo: " url "  |  something didn't work out. Invalid url? Github offline? ")})
-    ))
+    (response {:foo (str "echo: " url "  |  something didn't work out. Invalid url? Github offline? ")})))
 
 (defroutes routes
   (POST "/javadoc" [url] (do
