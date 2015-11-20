@@ -1,6 +1,6 @@
 (ns duck.server
   (:require
-        [duck.github]
+        [duck.github :as github]
         [compojure.core :refer [defroutes GET POST]]
         [compojure.route :refer [not-found resources]]
         [compojure.handler :refer [site]] ; ??? form, query params decode; cookie; session, etc
@@ -12,7 +12,12 @@
 
 
 (defn route-javadoc [url]
-  (response {:foo (str "echo: " url)}))
+  (if-let [path (github/download-github-repo url)]
+    (response {:foo (str "echo: " url "  |  unzipped folder name: " path)})
+
+    ; download-github-url does not return nil yet, just throw an exception.
+    (response {:foo (str "echo: " url "  |  something didn't work out. Invalid url? Github offline? ")})
+    ))
 
 (defroutes routes
   (POST "/javadoc" [url] (do

@@ -3,14 +3,12 @@
 ;takes a file on disk and a path, extracts entire zip
 (defn- unzip-dir!
   [file dest-path]
-  (try
-    (let [zip-file (net.lingala.zip4j.core.ZipFile. file)]
-      (.extractAll zip-file dest-path)
+  (let [zip-file (net.lingala.zip4j.core.ZipFile. file)]
+    (.extractAll zip-file dest-path)
 
-      (str
-       dest-path
-       (.. zip-file getFileHeaders (get 0) getFileName)))
-    (catch Exception e (.getMessage e))))
+    (str
+     dest-path
+     (.. zip-file getFileHeaders (get 0) getFileName))))
 
 ;transforms base repo url to downloadable archive url
 (defn- github->api-link [link]
@@ -29,9 +27,14 @@
 ; (download-github-repo "https://github.com/pallix/tikkba")
 ;  => "C:\\projects\\duck\\downloads\\pallix-tikkba-3d2d930/"
 (defn download-github-repo [base-url]
-  (let [rand-name (str (rand-int 5000))
-        dir (str (System/getProperty "user.dir") "\\downloads\\")]
-    (-> base-url
-        github->api-link
-        (download! (str dir rand-name ".zip"))
-        (unzip-dir! dir))))
+  (try
+    (let [rand-name (str (rand-int 5000))
+          dir (str (System/getProperty "user.dir") "\\downloads\\")]
+      (-> base-url
+          github->api-link
+          (download! (str dir rand-name ".zip"))
+          (unzip-dir! dir)))
+    (catch Exception e
+      (do
+        (print (.getMessage e))
+        nil))))
