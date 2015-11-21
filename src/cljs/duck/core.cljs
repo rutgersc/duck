@@ -13,7 +13,7 @@
 (defonce app-state (reagent/atom
                      {:header-title "Duck Project!"
                       :javadoc-response ""
-                      :github-url "https://github.com/pallix/tikkba"
+                      :github-url "https://github.com/pdurbin/maven-hello-world"
                       :paused false
                       :width 500
                       :height 500}))

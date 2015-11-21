@@ -15,3 +15,4 @@ pom.xml
 # We just want this folder to exist, nothing inside
 downloads/*.zip
 downloads/*/*
+flubber.txt
