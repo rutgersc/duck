@@ -27,7 +27,8 @@
                  [secretary "1.2.3"]
                  [net.lingala.zip4j/zip4j "1.3.2"]
                  [quil "2.2.6"]
-                 [cheshire "5.5.0"]]
+                 [cheshire "5.5.0"]
+                 [me.raynes/fs "1.4.6"]]
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-figwheel "0.4.0"]]

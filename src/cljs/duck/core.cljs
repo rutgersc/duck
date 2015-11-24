@@ -13,7 +13,7 @@
 (defonce app-state (reagent/atom
                      {:header-title "Duck Project!"
                       :javadoc-response ""
-                      :github-url "https://github.com/pdurbin/maven-hello-world"
+                      :github-url "https://github.com/square/retrofit"
                       :paused false
                       :width 500
                       :height 500}))
@@ -60,7 +60,9 @@
                       (swap! app-state assoc :javadoc-response (:foo data)))))
 
 (defn test-click [e]
-  (.log js/console javadoc-sketch))
+  (POST "/test" {:foo "test"}
+        {:handler (fn [data]
+                   (.log js/console data))}))
 
 (defn main-page []
   [:div
