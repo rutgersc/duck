@@ -75,7 +75,7 @@
     (if-let [entry-path (javadoc-entry-path unzip-path)]
       (let [javadoc-exit-code (run-javadoc entry-path (get-subpackages entry-path))
             javadoc-output (slurp "flubber.txt")]
-        (response {:foo (str "echo: " url "  |  entry path: " entry-path "  |  javadoc output: " javadoc-output)}))
+        (response javadoc-output))
       (response {:foo (str "echo: " url "  |  something didn't work out. Couldn't find a src directory.")}))
     (response {:foo (str "echo: " url "  |  something didn't work out. Invalid url? Github offline? ")})))
 

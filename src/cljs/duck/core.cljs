@@ -51,18 +51,21 @@
               :navigation-2d {}
               :middleware [m/fun-mode m/navigation-2d])
 
-
 (defn generate-doc-click [& e]
-  (get-json-javadoc (@app-state :github-url) ;"https://github.com/weavejester/ring-json-response"
+  (get-json-javadoc (@app-state :github-url)
                     (fn [data]
-                      (this-as my-this (.log js/console my-this))
-                      (.log js/console e)
-                      (swap! app-state assoc :javadoc-response (:foo data)))))
+                      (.log js/console "The javadoc JSON (as a cljs map): " data)
+                      (.log js/console "The javadoc JSON: " (clj->js data))
+                      (swap! app-state assoc :javadoc-response data))))
 
 (defn test-click [e]
-  (POST "/test" {:foo "test"}
-        {:handler (fn [data]
-                   (.log js/console data))}))
+  (POST "/test"
+        {:foo "test"}
+        {:handler (fn [data] (.log js/console data))}))
+
+(defn packages->package-names [packages]
+  (let [package-names (clojure.string/join ", " (map #(:name %) packages))]
+    (str "Package names: " package-names)))
 
 (defn main-page []
   [:div
@@ -76,7 +79,7 @@
                  :on-change (fn [x] (swap! app-state assoc :github-url (-> x .-target .-value)))}]
         [:a {:href "#" :class "button" :on-click generate-doc-click} "Create"]]
       [:div
-        (:javadoc-response @app-state)]
+        (packages->package-names (:javadoc-response @app-state))]
       [:a {:href "#" :class "button" :on-click #(set-quil-pause! (not (@app-state :paused)))} "Pause/resume"]
       [:a {:href "#" :class "button" :on-click test-click} "test"]]])
 
@@ -94,4 +97,4 @@
     (.addEventListener js/window "resize" windowresize-handler)))
 
 (defn on-js-reload []
-  (println ".."))
+  (println "..reloaded"))
