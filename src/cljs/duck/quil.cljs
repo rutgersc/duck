@@ -12,7 +12,7 @@
 
 (defn update-state [state]
   (let [{:keys [color angle navigation-2d]} state]
-    (.log js/console (str "zoom value = "(:zoom navigation-2d)))
+    ;(.log js/console (str "zoom value = "(:zoom navigation-2d)))
     {:color (mod (+ color 0.7) 255)
      :angle (mod (+ angle 0.1) q/TWO-PI)
      :navigation-2d navigation-2d}))
