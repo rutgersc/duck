@@ -2,7 +2,7 @@
 
 (defn tools-jar []
   ;; for some reason the JRE often ends up on JAVA_HOME. bit of a hack
-  (.replace (.getCanonicalPath (io/file (System/getProperty "java.home")
+  (.replace (.getCanonicalPath (io/file (System/getenv "JAVA_HOME")
                                 "lib" "tools.jar"))
            "jre"
            "jdk"))
