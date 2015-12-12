@@ -1,11 +1,20 @@
 (require '[clojure.java.io :as io])
 
+;try 2 paths, hopefully this'll work on most PCs
 (defn tools-jar []
-  ;; for some reason the JRE often ends up on JAVA_HOME. bit of a hack
-  (.replace (.getCanonicalPath (io/file (System/getenv "JAVA_HOME")
-                                "lib" "tools.jar"))
-           "jre"
-           "jdk"))
+  (let [fix-fn #(.replace % "jre" "jdk")
+        file1   (-> (System/getenv "JAVA_HOME")
+                    (str "\\lib\\tools.jar" )
+                    fix-fn
+                    clojure.java.io/file)
+        file2   (-> (System/getProperty "java.home")
+                    (str "\\lib\\tools.jar" )
+                    fix-fn
+                    clojure.java.io/file)]
+    (.getCanonicalPath (cond
+                         (.exists file1) file1
+                         (.exists file2) file2
+                         :default (throw (Exception. (str "tools.jar cannot be found. files tried:\n" file1 "\n" file2 "\n")))))))
 
 (defproject duck "0.1.0-SNAPSHOT"
   :description "FIXME: write this!"
@@ -29,6 +38,8 @@
                  [quil "2.2.6"]
                  [cheshire "5.5.0"]
                  [me.raynes/fs "1.4.6"]]
+
+  ;:foreign-libs ["https://github.com/dhotson/springy/blob/master/springy.js"]
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-figwheel "0.4.0"]]
