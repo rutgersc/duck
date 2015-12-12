@@ -42,6 +42,10 @@
       (quil-core/no-loop)
       (quil-core/start-loop))))
 
+(defn set-quil-javadoc-state [state]
+  (quil-core/with-sketch (quil-core/get-sketch-by-id "javadoc-canvas")
+    (swap! (quil-core/state-atom) update-in [:doc] (fn [x] state))))
+
 (quil-core/defsketch javadoc-sketch
               :host "javadoc-canvas"
               :size [(.-innerWidth  js/window) (.-innerHeight  js/window)]
@@ -56,6 +60,7 @@
                     (fn [data]
                       (.log js/console "The javadoc JSON (as a cljs map): " data)
                       (.log js/console "The javadoc JSON: " (clj->js data))
+                      (set-quil-javadoc-state data)
                       (swap! app-state assoc :javadoc-response data))))
 
 (defn test-click [e]
