@@ -39,7 +39,6 @@
                  [cheshire "5.5.0"]
                  [me.raynes/fs "1.4.6"]]
 
-  ;:foreign-libs ["https://github.com/dhotson/springy/blob/master/springy.js"]
 
   :plugins [[lein-cljsbuild "1.1.0"]
             [lein-figwheel "0.4.0"]]
@@ -55,12 +54,12 @@
   :uberjar {:aot :all}
   ;;:uberjar-name "duck-doclet.jar"
 
-
   :cljsbuild {
               :builds [{:id "dev"
                         :source-paths ["src/cljs"]
                         :figwheel {:on-jsload "duck.core/on-js-reload"}
                         :compiler {:main duck.core
+
                                    :asset-path "js/compiled/out"
                                    :output-to "resources/public/js/compiled/duck.js"
                                    :output-dir "resources/public/js/compiled/out"

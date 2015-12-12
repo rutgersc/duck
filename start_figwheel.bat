@@ -1,2 +1,2 @@
-lein figwheel
+cmd /k lein figwheel
 pause
