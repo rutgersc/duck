@@ -19,22 +19,33 @@
     graph))
 
 ;(force-directed-graph graph 400 400 0.5)
-(defn- force-graph [graph x y z]
+(defn- force-graph- [graph x y z]
   (s.Layout.ForceDirected. graph x y z))
 
 (defn- update-internal [force-graph ticks]
   (.call force-graph.tick force-graph ticks))
 
+(defn- get-node-map [force-graph] (reduce
+                                    #(assoc %1  (aget %2 "data") (.-p (aget force-graph.nodePoints (aget %2 "id"))))
+                                    {}
+                                    force-graph.graph.nodes))
 
 ;------------------------
 ;----- global stuff -----
 ;------------------------
-;(create-graph ["a" "b" "c"] 400 400 0.5)
-(defn create-graph [nodes x y z] (-> (create-graph2 nodes)
-                                     (force-graph x y z)))
+; x: Spring stiffness
+; y: Node repulsion
+; z: Damping
+;(force-graph ["a" "b" "c"] 400 400 0.5)
+(defn force-graph [nodes x y z] (-> (create-graph2 nodes)
+                                     (force-graph- x y z)))
 
 
-;todo: return map like this: {class1 [x y], class2 [x y], etc}
+;returns format: {initially-given-node #js {x 0 y 0}}
+;getting x val example:  (.-x (get (update-graph l 0.02) "a"))
 (defn update-graph [force-graph ticks]
-  (update-internal force-graph ticks))
-  ;(println (.call force-graph.totalEnergy force-graph)))
+  (update-internal force-graph ticks)
+  (get-node-map force-graph))
+
+
+  ;(comment (println (.-nodePoints force-graph))))
