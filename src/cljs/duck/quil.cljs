@@ -60,6 +60,13 @@
 ; ------------------------------------------------------------
 ; Quil standard methods
 ; ------------------------------------------------------------
+(def rendertree (atom nil))
+(defn construct-render-tree [doc]
+  {0 #(doseq [x doc] (draw-package x 0 0))
+   1 #(doseq [x doc] (draw-package x 0 1))
+   2 #(doseq [x doc] (draw-package x 0 2))
+   :go-deeper nil})
+
 
 (defn setup []
   (q/frame-rate 30)
@@ -68,15 +75,18 @@
    :doc nil})
 
 (defn update-state [state]
+  (when (not (-> state :doc nil?))
+    (reset! rendertree (-> state :doc construct-render-tree)))
   (-> state
-    (update-in [:zoom] #(int (:zoom (:navigation-2d state)))))) ; Convert zoom value to an int
+      (update-in [:zoom] #(int (:zoom (:navigation-2d state)))))) ; Convert zoom value to an int
 
 (defn draw-state [state]
   (q/background 240)
   (q/fill 123 255 255)
   (draw-random-nodes)
   (let [{:keys [zoom doc]} state]
-    (when (not (nil? doc))
-      (draw-doc doc zoom))))
+    (when (not (nil? @rendertree))
+      ((@rendertree 0)))))
+      ;(draw-doc doc zoom))))
 
 
