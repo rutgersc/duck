@@ -4,7 +4,7 @@
 
 
 ;(constantly-dropping-range 5) => '((1 2 3 4) (2 3 4) (3 4))
-;(constantly-dropping-range 3) => '((1 2) (3))
+;(constantly-dropping-range 3) => '((1 2) (2))
 (defn- constantly-dropping-range [r]
   (map #(range % r) (range 1 r)))
 
