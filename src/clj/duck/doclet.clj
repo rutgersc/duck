@@ -69,6 +69,13 @@
     :return-type (process-type (.returnType m))
     :parameters (map process-parameter (.parameters m))})
 
+;importedClasses seems to be buggy, maybe it crashes when nothing is imported? Odd since importedNamespaces works fine
+(defn proces-imported-classes [c]
+  (try
+    (map #(.name %) (.importedClasses c))
+    (catch Exception e
+      [])))
+
 (defn process-class [c]
   { :name              (.name c)
     :description       (.commentText c)
@@ -77,7 +84,8 @@
     :constructors      (map process-constructor (.constructors c))
     :methods           (map process-method (.methods c))
     :super-class       (if-let [sc (.superclass c)] (docname sc)) ; TODO: Use superclassType, https://docs.oracle.com/javase/8/docs/jdk/api/javadoc/doclet/com/sun/javadoc/ClassDoc.html#superclassType--
-    :implemented-interfaces (map docname (.interfaces c))})
+    :implemented-interfaces (map docname (.interfaces c))
+    :imported-classes  (proces-imported-classes c)})
 ;    :nested-classes    (keep-classes (.innerClasses c))
 ;    :nested-interfaces (keep-interfaces (.innerClasses c))})
 ;    :known-subclasses  ???
