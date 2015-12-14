@@ -5,7 +5,8 @@
             [secretary.core :as secretary :refer-macros [defroute]]
             [duck.quil :as duck-quil]
             [quil.core :as quil-core :include-macros true]
-            [quil.middleware :as m]))
+            [quil.middleware :as m]
+            [quil.sketch :as quil-sketch]))
 
 (enable-console-print!)
 
@@ -92,9 +93,12 @@
 
 (defn windowresize-handler
   [event]
-  (do
-    (swap! app-state assoc :width (.-innerWidth  js/window))
-    (swap! app-state assoc :height (.-innerHeight js/window))))
+  (let [new-width (.-innerWidth  js/window)
+        new-height (.-innerHeight js/window)]
+    (swap! app-state assoc :width new-width
+                           :height new-height)
+    (quil-core/with-sketch (quil-core/get-sketch-by-id "javadoc-canvas")
+      (quil-sketch/size new-width new-height))))
 
 (defonce on-first-load
   (do
