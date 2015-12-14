@@ -87,7 +87,8 @@
       [:div
         (packages->package-names (:javadoc-response @app-state))]
       [:a {:href "#" :class "button" :on-click #(set-quil-pause! (not (@app-state :paused)))} "Pause/resume"]
-      [:a {:href "#" :class "button" :on-click test-click} "test"]]])
+      [:a {:href "#" :class "button" :on-click test-click} "test"]
+      [:a {:href "#" :class "button md-trigger md-setperspective" :data-modal "overlay-content"} "fancy overlay with content"]]])
 
 (reagent/render-component [main-page] (. js/document (getElementById "app")))
 

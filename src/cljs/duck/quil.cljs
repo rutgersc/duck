@@ -72,7 +72,7 @@
     (update-in [:zoom] #(int (:zoom (:navigation-2d state)))))) ; Convert zoom value to an int
 
 (defn draw-state [state]
-  (q/background 240)
+  (q/background 0 0)
   (q/fill 123 255 255)
   (draw-random-nodes)
   (let [{:keys [zoom doc]} state]
