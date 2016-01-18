@@ -12,70 +12,123 @@
 (defn determine-text-size [zoom]
   (condp = zoom
     0 18
-    1 14
+    1 13
     2 7
-    3 4
+    3 6
     4 3
     5))
 
+(defn draw-scaled-text [data x y root]
+  (q/text-size (determine-text-size root))
+  (q/text data x y))
+
+(defn loop-elements [drawfn startelements root zoom]
+  (loop [elements startelements
+         newwidth 0
+         newheight 0]
+    (let [elem (first elements)]
+      (if (nil? elem)
+        {:w newwidth :h newheight}
+        (let [nextx (+ newwidth 0)
+              nexty (+ newheight 0)
+              elemsize (drawfn elem root zoom nextx nexty)]
+          (recur (rest elements)
+                 (+ newwidth 10 (:w elemsize))
+                 (+ newheight 0))))))) ; (:h classsize))))))))
+
+
+
+; ------------------------------------------------------------
+
+(defn draw-method-1 [data root zoom x y]
+  (let [{:keys [name]} data]
+    (q/fill 30 30 100)
+    (draw-scaled-text name (+ x 10) (+ y 10) root)))
+
+(defn draw-method-2 [data root zoom x y]
+  (let [{:keys [description]} data]
+    (draw-method-1 data root zoom x y)
+    (draw-scaled-text (subs description 0 30) (+ x 10) (+ y 30) root)))
+
 (defn draw-method [data root zoom x y]
   (let [level (- zoom root)
-        {:keys [name description]} data
-        w 100 h 60
-        w_scaled (quot w root) h_scaled (quot h root)
-        text_size_scaled (determine-text-size root)]
+        w 100 h 60]
     (q/fill (* level 80) 100 100)
-    (q/rect x y w_scaled h_scaled)
+    (q/rect x y w h)
     (cond
-      (<= level 0)  (do
-                      {:w w_scaled :h h_scaled})
-      (>= level 1)  (let [name_x (+ x (quot 10 root))
-                          name_y (+ y (quot 15 root))]
-                      (q/fill 30 30 100)
-                      (q/text-size text_size_scaled)
-                      (q/text name name_x name_y)
-                      {:w w_scaled :h h_scaled})
-      :else (.log js/console "ERROR!!" level))))
+      (<= level 0)  (do {:w w :h h})
+      (<= level 1)  (do (draw-method-1 data root zoom x y)
+                        {:w w :h h})
+      (>= level 2)  (do (draw-method-2 data root zoom x y)
+                        {:w w :h h}))))
+
+(defn draw-class-1 [data root zoom x y]
+  (let [{:keys [name]} data]
+    (q/fill 100 10 10)
+    (draw-scaled-text name (+ x 10) (+ y 10) root)))
+
+(defn draw-class-2 [data root zoom x y]
+  (let [{:keys [description methods]} data]
+    (draw-class-1 data root zoom x y)
+    (draw-scaled-text (subs description 0 30) (+ x 10) (+ y 30) root)
+    (let [innerroot (+ root 1)]
+      (q/with-translation [x y]
+        (q/scale (/ 1 innerroot))
+        (loop-elements draw-method (take 2 methods) innerroot zoom)))))
+        ;(draw-method (first methods) next-level zoom 0 0)))))
+        ; (doseq [m methods] (draw-method m next-level zoom x y))))))
 
 (defn draw-class [data root zoom x y]
   (let [level (- zoom root) ; level voor elke class individueel berekenen vanwege inner classes
         {:keys [name description methods]} data
-        w 100 h 60]
-    (q/fill 10 50 100)
-    (q/rect x y w h)
-    (when (> level 0)
-      (q/fill 100 10 10)
-      (q/text-size (determine-text-size zoom))
-      (q/text name (+ x 10) (+ y 10))); alle x en y zijn nog hardcoded. Alles overlapt nu :|
-    ; (when (> level 1)
-    ;   (doseq [m methods] (draw-method m (+ root 1) zoom)))))
-    {:w w :h h}))
+        w 100 h 100]
+    (q/fill (* level 10) 30 130)
+    (cond
+      (<= level 0)  (do (q/rect x y w h)
+                        {:w w :h h})
+      ( = level 1)  (do (q/rect x y w h)
+                        (draw-class-1 data root zoom x y)
+                        {:w w :h h})
+      (>= level 2)  (do (q/rect x y w h)
+                        (draw-class-2 data root zoom x y)
+                        {:w w :h h}))))
 
 (defn draw-package [data root zoom x y]
   (let [level (- zoom root),
-        {:keys [name description classes]} data]
+        {:keys [name description classes]} data
+        fixedwidth 300
+        fixedheight 300]
     (q/fill 255 150 150)
-    (q/rect x y 400 400)
+    (if (zero? (count classes))
+      (q/rect x y 150 80)
+      (q/rect x y fixedwidth fixedheight))
     (when (> level 0)
       (q/fill 200 30 30)
       (let [name-width (count name)]
-        (q/text name (+ x name-width) (+ y -10))))
+        (draw-scaled-text name (+ x name-width) (+ y 10) root)))
     (when (> level 1)
-      (q/text (subs description 0 30) (+ x -40) (+ y 20))
-      (doseq [c classes] (draw-class c (+ root 1) zoom x y)))))
+      (draw-scaled-text (subs description 0 30) (+ x 10) (+ y 30) root)
+      (let [innerroot (+ root 1)]
+        (q/with-translation [x (+ y 50)]
+          (q/scale (/ 1 innerroot))
+          (loop-elements draw-class classes innerroot zoom))))
+    {:w fixedwidth :h fixedheight}))
 
 (defn draw-doc [data zoom]
-  (let [first-package (first data)] ; Eerst alleen de eerste package testen
-    (draw-package first-package 0 zoom 0 0)))
-    ;(draw-package first-package 1 (+ zoom 1) 0 500)))
+  (let [first-package (first data)]
+    (loop-elements draw-package data 1 zoom)))
 
 (defn draw-example-method [zoom]
-  (let [data {:name "testName"
-              :description "cyka blyat haaieeeeee"}
-        x 150 y 250]
-    (draw-method data 1 zoom x y)
-    (draw-method data 2 zoom (+ x 10) (+ y 20))
-    (draw-method data 3 zoom (+ x 30) (+ y 30))))
+  (let [data {:name "testName" :description "cyka blyat haaieeeeee"}
+        x 150 y 250 root 1]
+    (draw-method data root zoom x y)
+    (q/with-translation [x y]
+      (q/scale (/ 1 (+ root 1)))
+      (draw-method data (+ root 1) zoom 100 10))
+    (q/with-translation [x y]
+      (q/scale (/ 1 (+ root 2)))
+      (draw-method data (+ root 2) zoom 50 50))))
+
 
 ;----test----
 ;(def graph (atom (g/force-graph ["node1" "node2" "node3"] 200 200 0.5)))
@@ -93,6 +146,7 @@
     (doseq [[k v] result]
       (q/text k (+ 500 (* 100 (.-x v)))  (+ 500 (* 100 (.-y v)))))))
 
+
 ; ------------------------------------------------------------
 ; Quil standard methods
 ; ------------------------------------------------------------
@@ -108,11 +162,11 @@
     (update-in [:zoom] #(int (:zoom (:navigation-2d state)))))) ; Convert zoom value to an int
 
 (defn draw-state [state]
-  ;(.log js/console (:zoom (:navigation-2d state)))
+  ; (.log js/console (:zoom (:navigation-2d state)))
   (q/background 0 0)
   (q/fill 123 255 255)
-  (draw-random-nodes)
-  (draw-example-method (:zoom state)))
-  ; (let [{:keys [zoom doc]} state]
-  ;   (when (not (nil? doc))
-  ;     (draw-doc doc zoom))))
+  ;(draw-random-nodes)
+  ; (draw-example-method (:zoom state))
+  (let [{:keys [zoom doc]} state]
+    (when (not (nil? doc))
+      (draw-doc doc zoom))))

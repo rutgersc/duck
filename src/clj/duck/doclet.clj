@@ -78,6 +78,7 @@
 
 (defn process-class [c]
   { :name              (.name c)
+    :type              :class
     :description       (.commentText c)
     :is-abstract       (.isAbstract c)
     :fields            (map process-field (.fields c))
@@ -92,6 +93,7 @@
 
 (defn process-interface [i]
   { :name              (.name i)
+    :type              :interface
     :description       (.commentText i)
     :type-parameters   (map process-type-variable (.typeParameters i)) ; werkt niet ?
     :type-param-tags   (map process-param-tag (.typeParamTags i)) ; werkt niet ?
@@ -115,6 +117,7 @@
     (print-com_sun_javadoc_Doc-names "\nInners" all-inners)
     (print-com_sun_javadoc_Doc-names "\nFiltered" classes)
     { :name (.name p)
+      :type :package
       :description (.commentText p)
       :interfaces (map process-interface (.interfaces p))
       :classes (map process-class (.ordinaryClasses p))}))
