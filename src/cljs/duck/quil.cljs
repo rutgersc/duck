@@ -3,7 +3,8 @@
             [duck.graph :as g]
             [secretary.core :as secretary :refer-macros [defroute]]
             [quil.core :as q :include-macros true]
-            [quil.middleware :as m]))
+            [quil.middleware :as m]
+            [clojure.walk :as w]))
 
 ; ------------------------------------------------------------
 ; Draw doc methods
@@ -65,8 +66,12 @@
       (doseq [c classes] (draw-class c (+ root 1) zoom x y)))))
 
 (defn draw-doc [data zoom]
-  (let [first-package (first data)] ; Eerst alleen de eerste package testen
-    (draw-package first-package 0 zoom 0 0)))
+  (let [xys (-> (meta data) :graph (g/update-graph 0.02))]
+    (doseq [package data]
+      (let [x (* 200 (.-x (xys package)))
+            y (* 200 (.-y (xys package)))]
+;(println y)
+        (draw-package package 0 zoom x y)))))
     ;(draw-package first-package 1 (+ zoom 1) 0 500)))
 
 (defn draw-example-method [zoom]
@@ -78,12 +83,12 @@
     (draw-method data 3 zoom (+ x 30) (+ y 30))))
 
 ;----test----
-;(def graph (atom (g/force-graph ["node1" "node2" "node3"] 200 200 0.5)))
+(def graph (atom (g/force-graph [{:test "ok"} {:test "ok2"} ] 200 200 0.5)))
 ;(def graph (atom (g/force-graph ["node1" "node2" "node3" "node4" "node5" "node6" "node7"] 200 200 0.2)))
-(def graph (atom (g/force-graph ["node1" "node2" "node3" "node4" "node5" "node6" "node7"
-                                 "node11" "node21" "node31" "node41" "node51" "node61" "node71"
-                                 "node111" "node211" "node311" "node411" "node511" "node611" "node711"
-                                 "node1111" "node2111" "node3111" "node4111" "node5111" "node6111" "node7111"] 200 200 0.2)))
+;(def graph (atom (g/force-graph ["node1" "node2" "node3" "node4" "node5" "node6" "node7"
+;                                 "node11" "node21" "node31" "node41" "node51" "node61" "node71"
+;                                 "node111" "node211" "node311" "node411" "node511" "node611" "node711"
+;                                 "node1111" "node2111" "node3111" "node4111" "node5111" "node6111" "node7111"] 200 200 0.2)))
 
 ;stop updating the graph when a min totalEnergy has been achieved
 ;make spring tension variable (based on node/edge count?)
@@ -92,6 +97,17 @@
   (let [result (g/update-graph @graph 0.03)]
     (doseq [[k v] result]
       (q/text k (+ 500 (* 100 (.-x v)))  (+ 500 (* 100 (.-y v)))))))
+
+;assign graph to toplevel (packages) and (recursively) classess and other packages
+(defn assign-graphs [data]
+  (with-meta (w/walk
+           #(if (or (= "class" (:type %)) (= "package" (:type %)))
+              (with-meta % {:graph (g/force-graph % 200 200 0.5)})
+              %)
+           identity
+           data)
+    {:graph (g/force-graph data 200 200 0.3)}))
+  ;(println data))
 
 ; ------------------------------------------------------------
 ; Quil standard methods
@@ -104,15 +120,22 @@
    :doc nil})
 
 (defn update-state [state]
+
+
   (-> state
-    (update-in [:zoom] #(int (:zoom (:navigation-2d state)))))) ; Convert zoom value to an int
+    (update-in [:zoom] #(int (:zoom (:navigation-2d state))))
+    (update-in [:doc]
+               #(if (and (not (nil? %)) (nil? (:graph (meta %)))) ;when not initiated yet
+                 (assign-graphs %)
+                 %))
+      ))  ; Convert zoom value to an int
 
 (defn draw-state [state]
   ;(.log js/console (:zoom (:navigation-2d state)))
   (q/background 0 0)
   (q/fill 123 255 255)
   (draw-random-nodes)
-  (draw-example-method (:zoom state)))
-  ; (let [{:keys [zoom doc]} state]
-  ;   (when (not (nil? doc))
-  ;     (draw-doc doc zoom))))
+  (draw-example-method (:zoom state))
+   (let [{:keys [zoom doc]} state]
+     (when (not (nil? doc))
+       (draw-doc doc zoom))))
