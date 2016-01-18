@@ -72,7 +72,7 @@
     (draw-class-1 data root zoom x y)
     (draw-scaled-text (subs description 0 30) (+ x 10) (+ y 30) root)
     (let [innerroot (+ root 1)]
-      (q/with-translation [x y]
+      (q/with-translation [(+ x 5) (+ y 50)]
         (q/scale (/ 1 innerroot))
         (loop-elements draw-method (take 2 methods) innerroot zoom)))))
         ;(draw-method (first methods) next-level zoom 0 0)))))
@@ -102,10 +102,10 @@
     (if (zero? (count classes))
       (q/rect x y 150 80)
       (q/rect x y fixedwidth fixedheight))
-    (when (> level 0)
-      (q/fill 200 30 30)
-      (let [name-width (count name)]
-        (draw-scaled-text name (+ x name-width) (+ y 10) root)))
+    ;(when (> level 0)
+    (q/fill 200 30 30)
+    (let [name-width (count name)]
+      (draw-scaled-text name (+ x name-width) (+ y 10) root))
     (when (> level 1)
       (draw-scaled-text (subs description 0 30) (+ x 10) (+ y 30) root)
       (let [innerroot (+ root 1)]
