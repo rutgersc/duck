@@ -3,7 +3,9 @@
             [duck.graph :as g]
             [secretary.core :as secretary :refer-macros [defroute]]
             [quil.core :as q :include-macros true]
-            [quil.middleware :as m]))
+            [quil.middleware :as m]
+            [domina :as dom]
+            [domina.xpath :refer [xpath]]))
 
 
 ; ------------------------------------------------------------
@@ -57,13 +59,93 @@
     (doseq [[k v] result]
       (q/text k (+ 500 (* 100 (.-x v)))  (+ 500 (* 100 (.-y v)))))))
 
+
+; ------------------------------------------------------------
+; Minardi's draw documentation methods
+;
+; [0] = alleen naam van packages (max zoom level)
+; .. die zijn maybe connected, tekenen met Springy
+; ------------------------------------------------------------
+(defn get-real-zoom []
+  (:zoom (q/state)))
+
+(def colors
+  {:orange [255 153 51]
+   :black [0 0 0]})
+
+(def arc-length (atom 0))
+(defn draw-package-name [c r w h x]
+  (let [w (q/text-width c)]
+    (reset! arc-length (+ @arc-length (/ w 2)))
+    (let [theta (+ q/PI (/ @arc-length r))]
+        (q/push-matrix)
+        (q/translate (* r (q/cos theta)) (* r (q/sin theta)))
+        (q/rotate (+ theta (/ q/PI 2)))
+        (q/fill 0)
+        (q/text c 0 0)
+        (q/pop-matrix))
+    (reset! arc-length (+ @arc-length (/ w 2)))))
+
+(defn draw-package2 [data x amount]
+  (let [r 100
+        w 40
+        h 40
+        {:keys [name description]} data
+        zoom-level (:zoom (:navigation-2d (q/state)))]
+    (if (= x 0)
+        (q/translate (- (/ (q/width) 2) (* amount r)) (/ (q/height) 2))
+        (q/translate x 0))
+    (q/fill 255 153 51)
+    (q/no-stroke)
+    (q/ellipse 0 0 (* (+ r 33) 2) (* (+ r 33) 2))
+    (q/fill 200 255 255)
+    (q/ellipse 0 0 (* (- r 2) 2) (* (- r 2) 2))
+    (q/fill  0 0)
+    (q/text-font (q/create-font "Georgia" w true))
+    (q/text-align :center)
+    (doseq [c name]
+      (draw-package-name c r w h x))
+    ;; extras
+    (q/text-font (q/create-font "Georgia" 4 true))
+    (if (< zoom-level 1.5)
+      (dom/set-styles! (xpath "//div[@id='app']/*") {:visibility "visible"}))
+    (if (> zoom-level 1.5)
+      (dom/set-styles! (xpath "//div[@id='app']/*") {:visibility "hidden"}))
+    (if (> zoom-level 2.5) ;; draw classnames & interfaces inside package
+      (q/text "classes:" 0 -90)))
+    (reset! arc-length 0))
+
+(defn draw-doc2 [data]
+  (let [amount (count data)]
+    (doseq [x (range 0 amount 1)]
+      (draw-package2 (get data x) (* x 400) amount))))
+  ;;(case (get-real-zoom)
+  ;;  0 (let [amount (count data)]
+  ;;      (doseq [x (range 0 amount 1)]
+  ;;        (draw-package2 (get data x) (* x 400) amount)))
+  ;;  "default"))
+
+    ;;(doall (for [x (range 0 amount 1)]
+             ;;(draw-package2 (get data x) (* x 400) amount)))))
+
+(defn setup2 []
+  (q/frame-rate 30)
+  (q/color-mode :rgb)
+  {:zoom 0
+   :doc nil})
+
+(defn draw-state2 [state]
+  (q/background 0 0)
+  ; draw zoom level 0
+  (let [{:keys [doc]} state]
+    (when (not (nil? doc))
+      (draw-doc2 doc))))
 ; ------------------------------------------------------------
 ; Quil standard methods
 ; ------------------------------------------------------------
 
 (defn setup []
   (q/frame-rate 30)
-  (q/color-mode :hsb)
   {:zoom 0
    :doc nil})
 

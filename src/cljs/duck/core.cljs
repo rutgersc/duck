@@ -17,7 +17,8 @@
                       :github-url "https://github.com/square/retrofit"
                       :paused false
                       :width 500
-                      :height 500}))
+                      :height 500
+                      :zoom 0})) ;; this zoom is for handling views (not quil zoom)
 
 (defn get-json-javadoc [git-url success]
   (POST "/javadoc"
@@ -50,15 +51,20 @@
 (quil-core/defsketch javadoc-sketch
               :host "javadoc-canvas"
               :size [(.-innerWidth  js/window) (.-innerHeight  js/window)]
-              :setup  duck-quil/setup
-              :update duck-quil/update-state
-              :draw   duck-quil/draw-state
-              :navigation-2d {}
+              :setup  duck-quil/setup2
+              ;:update duck-quil/update-state
+              :draw   duck-quil/draw-state2
+              :navigation-2d {} ;;zoom gets overridden
               :middleware [m/fun-mode m/navigation-2d])
+
+(defn reset-quil-zoom [zoom]
+  (quil-core/with-sketch (quil-core/get-sketch-by-id "javadoc-canvas")
+    (swap! (quil-core/state-atom) assoc-in [:navigation-2d :zoom] zoom)))
 
 (defn generate-doc-click [& e]
   (get-json-javadoc (@app-state :github-url)
                     (fn [data]
+                      (reset-quil-zoom 1)
                       (.log js/console "The javadoc JSON (as a cljs map): " data)
                       (.log js/console "The javadoc JSON: " (clj->js data))
                       (set-quil-javadoc-state data)
@@ -101,10 +107,70 @@
     (quil-core/with-sketch (quil-core/get-sketch-by-id "javadoc-canvas")
       (quil-sketch/size new-width new-height))))
 
+; ------------------------------------------------------------
+; ZOOM HANDLING
+; ------------------------------------------------------------
+(defn set-real-zoom [f]
+  (quil-core/with-sketch (quil-core/get-sketch-by-id "javadoc-canvas")
+    (swap! (quil-core/state-atom) update :zoom f)))
+
+(defn get-real-zoom []
+  (quil-core/with-sketch (quil-core/get-sketch-by-id "javadoc-canvas")
+    (:zoom (quil-core/state))))
+
+(defn get-quil-zoom []
+  (quil-core/with-sketch (quil-core/get-sketch-by-id "javadoc-canvas")
+    (:zoom (:navigation-2d (quil-core/state)))))
+
+(def zoom-lock-time 250) ;; wait-time for next scroll
+(def zoom-lock-atom (atom false))
+
+(def zoom-object
+  (.getElementById js/document "javadoc-canvas"))
+
+(defn zoom-lock []
+  (swap! zoom-lock-atom not))
+
+;; can also load other view here, reset quil-zoom
+(defn change-zoom [f zoom]
+  (do
+    ;; update real zoom
+    (set-real-zoom f)
+    (let [real-zoom (get-real-zoom)]
+      (reset-quil-zoom zoom))))
+
+(defn on-zoom []
+  (let [quil-zoom (get-quil-zoom)
+        real-zoom (get-real-zoom)]
+    ;;(.log js/console real-zoom)
+    ;;(.log js/console quil-zoom)
+    ;;(case real-zoom
+    ;;  0 (if (> quil-zoom 5)
+    ;;      (change-zoom inc 1))
+    ;;  1 (do (if (> quil-zoom 5)
+    ;;          (change-zoom inc 1))
+    ;;        (if (< quil-zoom 0.99)
+    ;;          (change-zoom dec 4.99)))
+    ;;  2 (do (if (< quil-zoom 0.99)
+    ;;          (change-zoom dec 4.99)))
+    ;;  "default")
+    (zoom-lock))) ;; as last remove zoom-lock
+
+(defn zoom-handler
+  [event]
+  (if (not @zoom-lock-atom)
+    (do
+      (zoom-lock)
+      ;;(if (> (.-deltaY event) 0)
+      ;;  (.log js/console "scroll down") ;; zoom out function
+      ;;  (.log js/console "scroll up"))  ;; zoom in function
+      (.setTimeout js/window on-zoom zoom-lock-time))))
+
 (defonce on-first-load
   (do
     (println "First load")
-    (.addEventListener js/window "resize" windowresize-handler)))
+    (.addEventListener js/window "resize" windowresize-handler)
+    (.addEventListener zoom-object "wheel" zoom-handler)))
 
 (defn on-js-reload []
   (println "..reloaded"))
