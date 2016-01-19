@@ -41,7 +41,7 @@
           highest-methods-amount (apply max (map count classes))]
       (reset! class-height (* method-height (+ (quot highest-methods-amount 3) 1)))
       (if (> classes-amount 0)
-        {:width (:package draw-widths) :height (* (+ 1 (quot classes-amount 6)) (* method-height (+ (quot highest-methods-amount 3) 1)))}
+        {:width (:package draw-widths) :height (* (+ 1 (quot classes-amount 6)) @class-height)};:height (* (+ 1 (quot classes-amount 6)) (* method-height (+ (quot highest-methods-amount 3) 1)))}
         {:width (:package draw-widths) :height 300}))))
 
 (defn get-size-for-class [data]
