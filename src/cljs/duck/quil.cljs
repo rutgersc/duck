@@ -27,6 +27,7 @@
 ; unlimited classes in a row (for now)
 ; 6 classes in a row
 ; 3 methods in a row
+(def class-height (atom 100))
 (def draw-widths {:package 355
                   :class 115
                   :method 100})
@@ -38,6 +39,7 @@
     ;(.log js/console data)
     (let [classes-amount (count classes)
           highest-methods-amount (apply max (map count classes))]
+      (reset! class-height (* method-height (+ (quot highest-methods-amount 3) 1)))
       (if (> classes-amount 0)
         {:width (:package draw-widths) :height (* (+ 1 (quot classes-amount 6)) (* method-height (+ (quot highest-methods-amount 3) 1)))}
         {:width (:package draw-widths) :height 300}))))
@@ -47,7 +49,7 @@
     ;(.log js/console data)
     (let [methods-amount (count methods)]
       ;(.log js/console (str name ": " methods-amount))
-      {:width (:class draw-widths) :height 130})));:height (* method-height (+ (quot methods-amount 3) 1))})))
+      {:width (:class draw-widths) :height @class-height})));:height (* method-height (+ (quot methods-amount 3) 1))})))
 
 (defn get-size-for-method [data]
   {:width (:method draw-widths) :height method-height})
@@ -115,7 +117,7 @@
     (let [innerroot (+ root 1)]
       (q/with-translation [(+ x 5) (+ y 50)]
         (q/scale (/ 1 innerroot))
-        (loop-elements draw-method (take 8 methods) innerroot zoom get-size-for-method 3)))))
+        (loop-elements draw-method methods innerroot zoom get-size-for-method 3)))))
         ;(draw-method (first methods) next-level zoom 0 0)))))
         ; (doseq [m methods] (draw-method m next-level zoom x y))))))
 
