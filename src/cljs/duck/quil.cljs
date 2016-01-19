@@ -27,7 +27,7 @@
 ; unlimited classes in a row (for now)
 ; 6 classes in a row
 ; 3 methods in a row
-(def draw-widths {:package 310
+(def draw-widths {:package 355
                   :class 115
                   :method 100})
 
